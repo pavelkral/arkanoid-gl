@@ -1,5 +1,6 @@
 #include "physicssystem.h"
 #include "../../utils/random.h"
+#include "../../utils/math.h"
 
 void Ecs::PhysicsSystem::Update(EntityManager &manager, float dt) {
     if (manager.globalState.gameOver) return;
@@ -53,15 +54,8 @@ void Ecs::PhysicsSystem::Update(EntityManager &manager, float dt) {
         auto* targetTrans = manager.getEntityComponent<TransformComponent>(targetE);
         if (!targetTrans) continue;
 
-        // Sphere vs Box AABB approximation
         float r = ballCol->radius;
-        float halfW = targetTrans->scale.x * 0.5f;
-        float halfH = targetTrans->scale.y * 0.5f;
-
-        bool hit = (ballTrans->position.x + r > targetTrans->position.x - halfW &&
-                    ballTrans->position.x - r < targetTrans->position.x + halfW &&
-                    ballTrans->position.y + r > targetTrans->position.y - halfH &&
-                    ballTrans->position.y - r < targetTrans->position.y + halfH);
+        bool hit = Math::checkAABB(targetTrans->position, targetTrans->scale,   ballTrans->position,r);
 
         if (hit) {
             TagComponent* tag = manager.getEntityComponent<TagComponent>(targetE);

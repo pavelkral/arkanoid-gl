@@ -3,6 +3,7 @@
 #include "../entity/entitymanager.h"
 
 namespace Ecs {
+
 class GameLogicSystem {
 public:
     void Update(EntityManager& manager);

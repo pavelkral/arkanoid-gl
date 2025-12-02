@@ -1,7 +1,8 @@
 #include "math.h"
 
+// AABB vs Point/Radius approximation for oop game
 bool Math::checkAABB(const glm::vec3 &bPos, const glm::vec3 &bScale, const glm::vec3 &spherePos, float r) {
-    // Simple AABB vs Point/Radius approximation
+
     float halfW = bScale.x * 0.5f;
     float halfH = bScale.y * 0.5f;
     return (spherePos.x + r > bPos.x - halfW && spherePos.x - r < bPos.x + halfW &&
