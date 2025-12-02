@@ -1,5 +1,6 @@
 # OpenGL Arkanoid
 
+<p style="text-align: center;"><img style="margin:2px auto;width:100%;" src='https://raw.githubusercontent.com/pavelkral/arkanoid-gl/refs/heads/main/img/arkanoid.jpg' /></p>
 
 # Building
 
