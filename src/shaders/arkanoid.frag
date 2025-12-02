@@ -6,9 +6,11 @@ out vec4 FragColor;
 
 void main() {
     vec3 N = normalize(vNormal);
+    // camera and ligt baked
     vec3 lightPos = vec3(10.0, 20.0, 10.0);
+    vec3 camPos = vec3(0.0, 15.0, 35.0);
     vec3 L = normalize(lightPos - vPos);
-    vec3 V = normalize(vec3(0.0, 15.0, 35.0) - vPos); // camera baked
+    vec3 V = normalize(camPos - vPos);
     // simple Blinn-Phong
     float diff = max(dot(N, L), 0.0);
     vec3 H = normalize(L + V);
