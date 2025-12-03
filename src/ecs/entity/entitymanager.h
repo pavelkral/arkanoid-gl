@@ -8,6 +8,7 @@
 #include "../../config.h"
 
 namespace Ecs {
+
 using Entity = std::uint32_t;
 const Entity NULL_ENTITY = 0;
 

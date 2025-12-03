@@ -23,7 +23,7 @@ bool Ecs::Game::init() {
     window.reset(glfwCreateWindow(Config::Camera::SCREEN_WIDTH, Config::Camera::SCREEN_HEIGHT, "Arkanoid ECS", nullptr, nullptr));
     if (!window) return false;
     glfwMakeContextCurrent(window.get());
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return false;
 
 
