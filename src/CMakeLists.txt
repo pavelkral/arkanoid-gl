@@ -21,14 +21,6 @@ set(HEADERS
     ../libs/glad/include/glad/glad.h
 )
 
-set(DISTFILES
-    ../.gitignore
-    ../LICENSE
-    ../README.md
-    shaders/arkanoid.frag
-    shaders/arkanoid.vert
- 
-)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
@@ -75,6 +67,11 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS}
 )
 
 if(WIN32)
+# DLLs to copy
+    set(DLL_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/../libs/glfw/glfw3.dll
+    
+    )
     foreach(dll ${DLL_FILES})
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${dll} $<TARGET_FILE_DIR:${PROJECT_NAME}>
@@ -89,11 +86,7 @@ if(WIN32)
         glu32
     )
 
-    # DLLs to copy
-    set(DLL_FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/../libs/glfw/glfw3.dll
     
-    )
 
 else() # Unix/Linux/Mac
     find_package(OpenGL REQUIRED)
@@ -107,7 +100,13 @@ else() # Unix/Linux/Mac
     )
 endif()
 
-# Copy shader files to output
-foreach(file IN LISTS DISTFILES)
-    configure_file(${file} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${file} COPYONLY)
-endforeach()
+set(DISTFILES
+    shaders/arkanoid.vert
+    shaders/arkanoid.frag
+)
+
+
+file(COPY
+    shaders/
+    DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders
+)
