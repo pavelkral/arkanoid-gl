@@ -83,7 +83,7 @@ if(WIN32)
     endforeach()
     # Windows linking
     target_link_libraries(${PROJECT_NAME}
-        ${CMAKE_CURRENT_BINARY_DIR}/../../../libs/glfw/glfw3dll.lib
+        ${CMAKE_CURRENT_BINARY_DIR}/../../../../libs/glfw/glfw3dll.lib
  
         opengl32
         glu32
