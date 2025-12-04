@@ -23,7 +23,7 @@ bool Ecs::Game::init() {
     window.reset(glfwCreateWindow(Config::Camera::SCREEN_WIDTH, Config::Camera::SCREEN_HEIGHT, "Arkanoid ECS", nullptr, nullptr));
     if (!window) return false;
     glfwMakeContextCurrent(window.get());
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return false;
 
 
@@ -80,18 +80,12 @@ void Ecs::Game::run() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderSystem.Update(manager, *shader);
-
         stats.update(dt);
         renderSystem.DrawUI(manager, stats,
-                            //todo fix put pointers to functin as render system members and move to initialize
-                            [&]() {
-                                this->resetGame();
-                            },
-
-                            [&]() {
-                                glfwSetWindowShouldClose(window.get(), true);
-                            }
-                            );
+            //todo fix put pointers to functin as render system members and move to initialize
+            [&]() {this->resetGame();},
+            [&]() {glfwSetWindowShouldClose(window.get(), true);}
+            );
 
         glfwSwapBuffers(window.get());
     }
