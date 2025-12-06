@@ -22,7 +22,7 @@ public:
 
     void bind() const;
     void unbind() const;
-     void allocate(size_t size, GLenum usage = GL_DYNAMIC_DRAW) ;
+    void allocate(size_t size, GLenum usage = GL_DYNAMIC_DRAW) ;
 
     template<typename T>
     void setData(const std::vector<T>& data, GLenum usage = GL_STATIC_DRAW) {
