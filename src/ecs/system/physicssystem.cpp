@@ -10,7 +10,7 @@ void Ecs::PhysicsSystem::Update(EntityManager &manager, float dt) {
     RigidbodyComponent* ballRb = nullptr;
     GameStateComponent* ballState = nullptr;
     ColliderComponent* ballCol = nullptr;
-
+    // Najdeme míèek
     for (auto& [e, tag] : manager.tags) {
         if (tag.type == TagType::Ball) {
             ballEntity = e;
@@ -24,6 +24,7 @@ void Ecs::PhysicsSystem::Update(EntityManager &manager, float dt) {
 
     if (!ballEntity || !ballState) return;
 
+    // (Sticky ball)
     if (!ballState->launched) {
         for (auto& [pe, ptag] : manager.tags) {
             if (ptag.type == TagType::Paddle) {
@@ -37,52 +38,92 @@ void Ecs::PhysicsSystem::Update(EntityManager &manager, float dt) {
         }
         return;
     }
-
+    // Pohyb míèku
     ballTrans->position += ballRb->velocity * dt;
-
-    if (ballTrans->position.x <= Config::World::MIN_X) { ballTrans->position.x = Config::World::MIN_X; ballRb->velocity.x *= -1.0f; }
-    else if (ballTrans->position.x >= Config::World::MAX_X) { ballTrans->position.x = Config::World::MAX_X; ballRb->velocity.x *= -1.0f; }
-    if (ballTrans->position.y >= Config::World::MAX_Y) { ballTrans->position.y = Config::World::MAX_Y; ballRb->velocity.y *= -1.0f; }
-
+    // Odraz od stìn (Walls)
+    if (ballTrans->position.x <= Config::World::MIN_X) {
+        ballTrans->position.x = Config::World::MIN_X;
+        ballRb->velocity.x *= -1.0f;
+    }
+    else if (ballTrans->position.x >= Config::World::MAX_X) {
+        ballTrans->position.x = Config::World::MAX_X;
+        ballRb->velocity.x *= -1.0f;
+    }
+    if (ballTrans->position.y >= Config::World::MAX_Y) {
+        ballTrans->position.y = Config::World::MAX_Y;
+        ballRb->velocity.y *= -1.0f;
+    }
+    //  (Paddle, Bricks)
     std::vector<Entity> destroyedEntities;
 
     for (auto& [targetE, targetCol] : manager.colliders) {
         if (targetE == ballEntity) continue;
-        // ball no colision
-        if (manager.powerUps.count(targetE)) continue;
+        if (manager.powerUps.count(targetE)) continue; // Ignore powerups
 
         auto* targetTrans = manager.getEntityComponent<TransformComponent>(targetE);
         if (!targetTrans) continue;
 
         float r = ballCol->radius;
-        bool hit = Math::checkAABB(targetTrans->position, targetTrans->scale,   ballTrans->position,r);
+        float halfW = targetTrans->scale.x * 0.5f;
+        float halfH = targetTrans->scale.y * 0.5f;
 
+        bool hit = Math::checkAABB(targetTrans->position, targetTrans->scale, ballTrans->position, r);
+        
         if (hit) {
             TagComponent* tag = manager.getEntityComponent<TagComponent>(targetE);
 
+            // --- PADDLE ---
             if (tag && tag->type == TagType::Paddle) {
-                ballRb->velocity = reflectVector(ballRb->velocity, glm::vec3(0,1,0));
+                // 
+                ballRb->velocity.y = abs(ballRb->velocity.y); //up
+ 
                 auto* playerCtrl = manager.getEntityComponent<PlayerControlComponent>(targetE);
                 if (playerCtrl) ballRb->velocity.x += playerCtrl->velocityX * 0.12f;
-                ballTrans->position.y = targetTrans->position.y + targetTrans->scale.y * 0.5f + r + 0.1f;
+
+				// unpenetrate the ball
+                ballTrans->position.y = targetTrans->position.y + halfH + r + 0.05f;
                 applySpeedup(ballRb->velocity);
             }
+
+            //fix tuneling
             else if (tag && tag->type == TagType::Brick) {
                 destroyedEntities.push_back(targetE);
                 manager.globalState.score += Config::Stats::SCORE_PER_BRICK;
-
-                //SPAWN POWER-UP
                 TrySpawnPowerUp(manager, targetTrans->position);
 
-                glm::vec3 delta = ballTrans->position - targetTrans->position;
-                glm::vec3 normal = (std::abs(delta.x) > std::abs(delta.y))
-                                       ? glm::vec3(delta.x > 0 ? 1 : -1, 0, 0)
-                                       : glm::vec3(0, delta.y > 0 ? 1 : -1, 0);
-                ballRb->velocity = reflectVector(ballRb->velocity, normal);
+				// depth of penetration
+                float deltaX = ballTrans->position.x - targetTrans->position.x;
+                float deltaY = ballTrans->position.y - targetTrans->position.y;
+				//depth of penetration in each axis
+                float intersectX = abs(deltaX) - (halfW + r);
+                float intersectY = abs(deltaY) - (halfH + r);
+				//  intersection x is smaller than y vertical intersection
+                if (intersectX > intersectY) {
+					// horizontal collision
+					// push the ball out in X axis
+                    if (deltaX > 0.0f)
+                        ballTrans->position.x = targetTrans->position.x + halfW + r;
+                    else
+                        ballTrans->position.x = targetTrans->position.x - halfW - r;
+                    ballRb->velocity.x *= -1.0f; // Odraz X
+                }
+                else {
+					// vertical collision
+					// push the ball out in Y axis
+                    if (deltaY > 0.0f)
+                        ballTrans->position.y = targetTrans->position.y + halfH + r;
+                    else
+                        ballTrans->position.y = targetTrans->position.y - halfH - r;
+
+                    ballRb->velocity.y *= -1.0f; //  Y
+                }
                 applySpeedup(ballRb->velocity);
+
+                break;
             }
         }
     }
+
     for (auto e : destroyedEntities) manager.destroyEntity(e);
 }
 

@@ -52,23 +52,32 @@ bool Ecs::Game::init() {
 }
 
 void Ecs::Game::run() {
+	//  FIXED dt use for physics and logic updates  
+    const float FIXED_DT = 1.0f / 120.0f; // 120 Hz
+    float accumulator = 0.0f;
 
     float lastTime = (float)glfwGetTime();
     while (!glfwWindowShouldClose(window.get())) {
         float now = (float)glfwGetTime();
-        float dt = std::min(now - lastTime, 0.05f);
+        float frameTime = std::min(now - lastTime, 0.05f); // oSPIRAL OF DEATH
         lastTime = now;
-
+        accumulator += frameTime;
         glfwPollEvents();
-        if (glfwGetKey(window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window.get(), true);
-        if (manager.globalState.gameOver && glfwGetKey(window.get(), GLFW_KEY_R) == GLFW_PRESS) resetGame();
+        if (glfwGetKey(window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window.get(), true);
 
-        inputSystem.Update(manager, window.get(), dt);
+        if (manager.globalState.gameOver &&
+            glfwGetKey(window.get(), GLFW_KEY_R) == GLFW_PRESS)
+            resetGame();
 
-        if (!manager.globalState.gameOver) {
-            physicsSystem.Update(manager, dt);
-            powerUpSystem.Update(manager, dt);
-            logicSystem.Update(manager);
+        inputSystem.Update(manager, window.get(), frameTime);
+        while (accumulator >= FIXED_DT) {
+            if (!manager.globalState.gameOver) {
+                physicsSystem.Update(manager, FIXED_DT);
+                powerUpSystem.Update(manager, FIXED_DT);
+                logicSystem.Update(manager);
+            }
+            accumulator -= FIXED_DT;
         }
 
         uboCamera->bind();
@@ -80,7 +89,7 @@ void Ecs::Game::run() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderSystem.Update(manager, *shader);
-        stats.update(dt);
+        stats.update(frameTime);
         renderSystem.DrawUI(manager, stats,
             //todo fix put pointers to functin as render system members and move to initialize
             [&]() {this->resetGame();},
