@@ -61,6 +61,7 @@ void Ecs::RenderSystem::DrawUI(EntityManager &manager, Stats &stats, std::functi
 
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::Begin("GameInfo", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground);
+    ImGui::SetWindowFontScale(1.5f);
     ImGui::TextColored(ImVec4(1, 1, 0, 1), "Score: %d", manager.globalState.score);
     ImGui::TextColored(ImVec4(1, 0, 0, 1), "Lives: %d", manager.globalState.lives);
     ImGui::End();
