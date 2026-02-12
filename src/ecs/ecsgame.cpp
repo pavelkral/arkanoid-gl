@@ -10,8 +10,6 @@
 #include <memory>
 #include <iostream>
 
-
-
 #include "../utils/stats.h"
 #include "../utils/random.h"
 
