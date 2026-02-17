@@ -12,6 +12,7 @@ The project is built using cmake.
 
 ### Dependencies
 
+
 * [glad](https://github.com/Dav1dde/glad)
 * [glm](https://github.com/g-truc/glm)
 * [glfw](https://github.com/glfw/glfw)
