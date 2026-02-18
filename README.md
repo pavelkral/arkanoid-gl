@@ -11,7 +11,7 @@ The project is built using cmake.
 ## Build from Source
 
 
-### Dependencies
+###  Dependencies
 
 
 * [glad](https://github.com/Dav1dde/glad)
